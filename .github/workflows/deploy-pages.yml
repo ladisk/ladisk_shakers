@@ -32,6 +32,13 @@ jobs:
         run: |
           python generate_docs.py
 
+      - name: Show built files
+        run: |
+          pwd
+          ls -la
+          du -sh docs || true
+          find docs -maxdepth 3 -type f | sed -n '1,50p'
+
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v4
         with:
