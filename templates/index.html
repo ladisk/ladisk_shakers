@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}LADISK small shakers documentation{% endblock %}
+
+{% block header_title %}LADISK small shakers documentation{% endblock %}
+
+{% block extra_css %}
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .equipment-list {
+            list-style: none;
+        }
+
+        .equipment-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .equipment-item:hover {
+            background: #e7f3ff;
+            transform: translateX(4px);
+        }
+
+        .equipment-item a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .equipment-item a:hover {
+            text-decoration: underline;
+        }
+
+        .metadata {
+            color: #666;
+            font-size: 0.9em;
+        }
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <ul class="equipment-list">
+            {% for item in equipment_items %}
+            <li class="equipment-item">
+                <a href="{{ item.filename }}">{{ item.title }}</a>
+                <div class="metadata">
+                    Manufacturer: {{ item.manufacturer }} | Model: {{ item.model }}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <p>Generated on {{ generated_date }}</p>
+{% endblock %}

@@ -1,0 +1,20 @@
+[shaker]
+model = "V101"
+manufacturer = "LDS"
+nominal_force = 10.0 # [N] Nominal force
+manual = ""
+
+[limits]
+force_sine = 8.9 # [N] Sine force limit
+displacement_pk_pk = 2.5 # [mm] Displacement limit (peak-to-peak)
+velocity_sine = 1.31 # [mm/s] Velocity limit (sine)
+acceleration_sine = 1373 # [m/s^2] Acceleration limit (sine)
+
+[performance]
+frequency_range = [5.0, 12000.0] # [Hz] Frequency range (useful)
+payload_capacity = 0.8 # [kg] Payload capacity
+max_input_current = 4.2 # [A] Maximum input current
+moving_mass = 0.0065 # [kg] Moving mass of the shaker
+
+[dimensions]
+shaker_mass = 0.91 # [kg] Shaker mass

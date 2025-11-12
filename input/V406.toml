@@ -1,0 +1,37 @@
+[shaker]
+model = "V406"
+manufacturer = "LDS"
+nominal_force = 100 # [N] Nominal force
+manual = "V400 user manual_E892301_17.pdf"
+
+[limits]
+force_sine = 98.0 # [N] Sine force limit
+force_random_rms = 89.0 # [N] Random force limit (RMS)
+velocity_sine = 1.78 # [m/s] Velocity limit (sine)
+acceleration_sine = 490.0 # [m/s^2] Acceleration limit (sine)
+acceleration_random_rms = 190.0 # [m/s^2] Acceleration limit (random, RMS)
+displacement_pk_pk = 14.0 # [mm] Displacement limit (peak-to-peak)
+
+[input_parameters]
+payload_mass = "float" # [kg] Mass of payload for vertical operation
+travel_required = "float" # [mm] Required travel for vertical operation
+
+[additional_checks]
+max_travel_available_vertical_operation = "displacement_pk_pk - (2 * payload_mass * 9.81 / axial_stiffness) > travel_required" # [mm] Maximum available travel during vertical operation
+max_payload_mass_vertical_operation = "axial_stiffness / 2 * (displacement_pk_pk - travel_required) / 9.81  > payload_mass" # [kg] Maximum payload for vertical operation
+
+[performance]
+armature_resonance_frequency = 9000.0 # [Hz] Resonance frequency of the armature
+useful_frequency_range = [5.0, 9000.0] # [Hz] Frequency range (useful)
+moving_mass = 0.20 # [kg] Mass of moving elements
+axial_stiffness = 12.3 # [N/mm] Suspension axial stiffness
+max_current = 6.0 # [A] Maximum current
+dc_force_factor = 11.1 # [N/A] Force per ampere
+
+[dimensions]
+mass_base = 14.1 # [kg] Mass of shaker base (mounting)
+mass_trunnion = 22.7 # [kg] Mass of shaker with trunnion mount
+height_base = 198.4 # [mm] Height of shaker base
+height_trunnion = 273.8 # [mm] Height of shaker with trunnion mount
+width_diameter = 165.0 # [mm] Diameter of shaker width
+length_trunnion = 259.0 # [mm] Length of shaker with trunnion mount

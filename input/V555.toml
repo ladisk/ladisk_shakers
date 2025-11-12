@@ -1,0 +1,32 @@
+[shaker]
+model = "V555"
+manufacturer = "LDS"
+nominal_force = 1000 # [N] Nominal force
+manual = "V550usermanual_E877351_13.pdf"
+
+[limits]
+force_sine = 940.0 # [N] Sine force limit
+force_random_rms = 636.0 # [N] Random force (RMS)
+velocity_sine = 1.5 # [m/s] Velocity limit (sine)
+acceleration_sine = 981.0 # [m/s^2] Acceleration limit (sine)
+acceleration_random_rms = 677.0 # [m/s^2] Acceleration limit (random, RMS)
+displacement_pk_pk = 25.4 # [mm] Displacement limit (peak-to-peak)
+
+[input_parameters]
+mount_plate_payload_cg_distance = "float" # [mm] Distance from payload mounting face to the center of gravity
+
+[additional_checks]
+max_payload_mass_horizontal = "567 / (44 + mount_plate_payload_cg_distance)" # [kg] Maximum payload mass during horizontal operation
+
+[performance]
+armature_resonance_frequency = 4850.0 # [Hz] Resonance frequency of the armature (bare table)
+useful_frequency_range = [5.0, 6300.0] # [Hz] Frequency range (useful)
+moving_mass = 0.99 # [kg] Mass of moving elements (nominal armature)
+spring_stiffness = 15.8 # [N/mm] Suspension spring stiffness (axial)
+max_current = 15.0 # [A rms] Maximum current (RMS)
+dc_force_factor = 6.8 # [N/A] Force per ampere
+payload_bearing_distance = 44.0 # [mm] Distance from mounting face to bearing center (constant)
+
+[dimensions]
+mass_base = 25.0 # [kg] Maximum payload with built-in air load support
+table_diameter = 110.0 # [mm] Diameter of shaker table

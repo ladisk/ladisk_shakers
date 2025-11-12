@@ -1,0 +1,23 @@
+[shaker]
+model = "TS3-150"
+manufacturer = "GWS"
+nominal_force = 3000 # [N] Nominal force
+manual = "Manual_TS3-150.pdf"
+
+[limits]
+force_sine = 3000.0 # [N] Sine force limit
+force_random_rms = 3000.0 # [N] Random force limit (RMS)
+force_shock = 6000.0 # [N] Shock force limit
+velocity = 2.0 # [m/s] Velocity limit
+acceleration = 1000.0 # [m/s^2] Acceleration limit
+displacement_pk_pk = 25.0 # [mm] Displacement limit (peak-to-peak)
+max_load = 120 # [kg] Maximum mass load
+
+[performance]
+armature_resonance_frequency = 2900.0 # [Hz] First resonance frequency
+useful_frequency_range = [5.0, 4000.0] # [Hz] Frequency range (useful)
+moving_mass = 3.0 # [kg] Mass of moving elements
+
+
+[dimensions]
+armature_diameter = 150.0 # [mm] Diameter of shaker armature

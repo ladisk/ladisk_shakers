@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LADISK small shakers documentation{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #f7d5da 0%, #605959 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            height: 50px;
+            width: auto;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin: 0;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .back-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            transition: background 0.3s;
+            font-size: 0.9em;
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            margin-top: 40px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.5em;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .logo {
+                height: 40px;
+            }
+        }
+
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <img src="static/Ladisk_logo_transparent.png" alt="Ladisk Logo" class="logo">
+                <h1>{% block header_title %}LADISK small shakers documentation{% endblock %}</h1>
+            </div>
+            <div class="header-right">
+                {% block header_right %}{% endblock %}
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

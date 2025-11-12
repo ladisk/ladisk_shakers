@@ -1,0 +1,20 @@
+[shaker]
+model = "DYN-PM-20"
+manufacturer = "Dynalabs"
+nominal_force = 20.0 # [N] Nominal force
+manual = "DYN_PM-20_PRODUCT_MANUAL.pdf"
+
+[limits]
+force_sine = 20.0 # [N] Sine force limit
+force_shock = 40.0 # [N] Shock force limit
+displacement_pk_pk = 5.0 # [mm] Displacement limit (peak-to-peak)
+acceleration_sine = 392.4 # [m/s^2] Acceleration limit (sine), [40 g converted to m/s^2]
+
+[performance]
+frequency_range = [0.0, 12000.0] # [Hz] Frequency range
+payload_capacity = 0.8 # [kg] Payload capacity
+max_input_current = 4.0 # [A] RMS Maximum input current
+max_input_voltage = 1.0 # [Vac] Maximum peak input voltage
+
+[dimensions]
+shaker_mass = 4.1 # [kg] Shaker mass
