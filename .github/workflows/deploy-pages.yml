@@ -26,15 +26,16 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install jinja2 tomli
+          pip install -r requirements.txt
 
       - name: Build docs
         run: |
           python generate_docs.py
 
       - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v4
         with:
+          name: pages
           path: ./docs
 
   deploy:
