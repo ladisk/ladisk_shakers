@@ -220,24 +220,15 @@ def process_toml_files(input_dir, output_dir, templates_dir):
             images_input_path = input_path / 'images'
             if images_input_path.exists():
                 for section_data in data.values():
-                    if isinstance(section_data, dict) and 'images' in section_data:
-                        images = section_data['images']
-                        if isinstance(images, str):
-                            images = [images]
-                        elif isinstance(images, dict):
-                            images = [images.get('path')]
-                        elif isinstance(images, list):
-                            images = [img.get('path') if isinstance(img, dict) else img for img in images]
-                        
-                        for image in images:
-                            if not image:
-                                continue
-                            src = images_input_path / image
-                            if src.exists():
-                                dst = images_output_path / image
-                                dst.parent.mkdir(parents=True, exist_ok=True)
-                                shutil.copy2(src, dst)
-                                print(f"  ✓ Copied image: {image}")
+                    if isinstance(section_data, dict) and 'image' in section_data:
+                        image = section_data['image']
+                        # Copy image file to output images directory if it exists
+                        src = images_input_path / image
+                        if src.exists():
+                            dst = images_output_path / image
+                            dst.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(src, dst)
+                            print(f"  ✓ Copied image: {image}")
             
             # Store information for index
             equipment_list.append({
@@ -271,4 +262,3 @@ def process_toml_files(input_dir, output_dir, templates_dir):
 
 if __name__ == "__main__":
     process_toml_files("input", "docs", "templates")
-# ...existing code...

@@ -3,6 +3,7 @@ model = "DYN-PM-10"
 manufacturer = "Dynalabs"
 nominal_force = 10.0 # [N] Nominal force
 manual = "DYN_PM-10_PRODUCT_MANUAL.pdf"
+image = "DYNALABS_PM-10.jpg"
 
 [limits]
 force = 10.0 # [N] Output force limit

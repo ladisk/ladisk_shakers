@@ -148,7 +148,7 @@
 {% block content %}
     {# Render all sections except shaker, input_parameters and additional_checks #}
     {% for section_name, section_data in equipment_data.items() %}
-        {% if section_name in ['shaker','input_parameters','additional_checks'] %}
+        {% if section_name in ['input_parameters','additional_checks'] %}
             {# skip here; input_parameters and additional_checks rendered at bottom #}
         {% else %}
             <div class="section" id="section-{{ section_name }}">
@@ -159,37 +159,39 @@
                     </thead>
                     <tbody>
                     {% for key, item in section_data.items() %}
-                        {% if item is mapping and 'value' in item %}
-                            <tr data-param="{{ key }}">
-                                <td>{{ key.replace('_', ' ').title() }}</td>
-                                <td>
-                                    {% if item.value is iterable and item.value is not string %}
-                                        {{ item.value | join(' - ') }}
-                                    {% else %}
-                                        {{ "%.4g" | format(item.value) if item.value is number else item.value }}
-                                    {% endif %}
-                                </td>
-                                <td>{{ item.unit }}</td>
-                                <td>{{ item.description }}</td>
-                            </tr>
-                        {% elif item is not mapping %}
-                            <tr data-param="{{ key }}">
-                                <td>{{ key.replace('_', ' ').title() }}</td>
-                                <td>
-                                    {% if item is iterable and item is not string %}
-                                        {{ item | join(' - ') }}
-                                    {% else %}
-                                        {{ "%.4g" | format(item) if item is number else item }}
-                                    {% endif %}
-                                </td>
-                                <td></td><td></td>
-                            </tr>
+                        {% if key not in ['image', 'manual'] %} {# skip image/manual entries that are rendered separately #}
+                            {% if item is mapping and 'value' in item %}
+                                <tr data-param="{{ key }}">
+                                    <td>{{ key.replace('_', ' ').title() }}</td>
+                                    <td>
+                                        {% if item.value is iterable and item.value is not string %}
+                                            {{ item.value | join(' - ') }}
+                                        {% else %}
+                                            {{ "%.4g" | format(item.value) if item.value is number else item.value }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.unit }}</td>
+                                    <td>{{ item.description }}</td>
+                                </tr>
+                            {% elif item is not mapping %}
+                                <tr data-param="{{ key }}">
+                                    <td>{{ key.replace('_', ' ').title() }}</td>
+                                    <td>
+                                        {% if item is iterable and item is not string %}
+                                            {{ item | join(' - ') }}
+                                        {% else %}
+                                            {{ "%.4g" | format(item) if item is number else item }}
+                                        {% endif %}
+                                    </td>
+                                    <td></td><td></td>
+                                </tr>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
 
-                {% if section_data.images %}
+                <!-- {% if section_data.images %}
                     <div class="image-container">
                         {% if section_data.images is string %}
                             <img src="images/{{ section_data.images }}" alt="{{ section_name }}">
@@ -208,10 +210,26 @@
                             {% endfor %}
                         {% endif %}
                     </div>
-                {% endif %}
+                {% endif %} -->
             </div>
         {% endif %}
     {% endfor %}
+
+    {# Render shaker image if present (handles raw string or enriched mapping) #}
+    {% if equipment_data.shaker and equipment_data.shaker.image %}
+        {% set _img = equipment_data.shaker.image %}
+        {% if _img is mapping and 'value' in _img %}
+            {% set _img_path = _img.value %}
+        {% else %}
+            {% set _img_path = _img %}
+        {% endif %}
+        <div class="section image-container" id="section-shaker-image">
+            <img src="images/{{ _img_path }}" alt="{{ title }}">
+            {% if equipment_data.shaker.image_caption %}
+                <div class="image-caption">{{ equipment_data.shaker.image_caption }}</div>
+            {% endif %}
+        </div>
+    {% endif %}
 
     {# Input parameters rendered at bottom (not as table) #}
     {% if equipment_data.input_parameters %}

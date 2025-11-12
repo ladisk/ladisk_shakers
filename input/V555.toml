@@ -3,6 +3,7 @@ model = "V555"
 manufacturer = "LDS"
 nominal_force = 1000 # [N] Nominal force
 manual = "V550usermanual_E877351_13.pdf"
+image = "LDS V555 en.jpg"
 
 [limits]
 force_sine = 940.0 # [N] Sine force limit

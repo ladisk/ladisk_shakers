@@ -3,6 +3,7 @@ model = "V406"
 manufacturer = "LDS"
 nominal_force = 100 # [N] Nominal force
 manual = "V400 user manual_E892301_17.pdf"
+image = "lds-v406.png"
 
 [limits]
 force_sine = 98.0 # [N] Sine force limit

@@ -2,6 +2,7 @@
 model = "V101"
 manufacturer = "LDS"
 nominal_force = 10.0 # [N] Nominal force
+image = "LDS-V101.png"
 
 [limits]
 force_sine = 8.9 # [N] Sine force limit

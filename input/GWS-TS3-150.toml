@@ -3,6 +3,7 @@ model = "TS3-150"
 manufacturer = "GWS"
 nominal_force = 3000 # [N] Nominal force
 manual = "Manual_TS3-150.pdf"
+image = "GWS_TS3-150.jpg"
 
 [limits]
 force_sine = 3000.0 # [N] Sine force limit
