@@ -1,12 +1,8 @@
 {% extends "base.html" %}
 
 {% block title %}{{ title }} - Equipment Documentation{% endblock %}
-
 {% block header_title %}{{ title }}{% endblock %}
-
-{% block header_right %}
-    <a href="index.html" class="back-link">← Back to Equipment List</a>
-{% endblock %}
+{% block header_right %}<a href="index.html" class="back-link">← Back to Equipment List</a>{% endblock %}
 
 {% block extra_css %}
         .section {
@@ -104,37 +100,67 @@
         .manual-link:hover {
             background: #218838;
         }
+
+        .check-result {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .check-result.pass {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .check-result.fail {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .check-result.pending {
+            background: #e2e3e5;
+            border-left-color: #6c757d;
+            color: #383d41;
+        }
+
+        .check-icon {
+            font-size: 1.2em;
+            font-weight: bold;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .check-content {
+            flex: 1;
+        }
+
+        .check-value {
+            font-weight: 600;
+        }
 {% endblock %}
 
 {% block content %}
-    <!-- Equipment sections will be rendered here by the template engine -->
+    {# Render all sections except shaker, input_parameters and additional_checks #}
     {% for section_name, section_data in equipment_data.items() %}
-        <div class="section">
-            <h3>{{ section_name.replace('_', ' ').title() }}</h3>
-            
-            {% if section_name == 'input_parameters' %}
-                <div>
-                {% for key, value in section_data.items() %}
-                    <div class="input-group">
-                        <label for="{{ key }}">{{ key.replace('_', ' ').title() }}:</label>
-                        <input type="number" id="{{ key }}" data-param="{{ key }}" placeholder="Enter {{ key.replace('_', ' ') }}" step="0.01">
-                    </div>
-                {% endfor %}
-                </div>
-            {% else %}
+        {% if section_name in ['shaker','input_parameters','additional_checks'] %}
+            {# skip here; input_parameters and additional_checks rendered at bottom #}
+        {% else %}
+            <div class="section" id="section-{{ section_name }}">
+                <h3>{{ section_name.replace('_', ' ').title() }}</h3>
                 <table>
                     <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Value</th>
-                            <th>Unit</th>
-                            <th>Description</th>
-                        </tr>
+                        <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Description</th></tr>
                     </thead>
                     <tbody>
                     {% for key, item in section_data.items() %}
                         {% if item is mapping and 'value' in item %}
-                            <tr>
+                            <tr data-param="{{ key }}">
                                 <td>{{ key.replace('_', ' ').title() }}</td>
                                 <td>
                                     {% if item.value is iterable and item.value is not string %}
@@ -147,7 +173,7 @@
                                 <td>{{ item.description }}</td>
                             </tr>
                         {% elif item is not mapping %}
-                            <tr>
+                            <tr data-param="{{ key }}">
                                 <td>{{ key.replace('_', ' ').title() }}</td>
                                 <td>
                                     {% if item is iterable and item is not string %}
@@ -156,42 +182,199 @@
                                         {{ "%.4g" | format(item) if item is number else item }}
                                     {% endif %}
                                 </td>
-                                <td></td>
-                                <td></td>
+                                <td></td><td></td>
                             </tr>
                         {% endif %}
                     {% endfor %}
                     </tbody>
                 </table>
-            {% endif %}
 
-            {% if section_data.images %}
-                <div class="image-container">
-                {% if section_data.images is string %}
-                    <img src="images/{{ section_data.images }}" alt="{{ section_name }}">
-                {% elif section_data.images is iterable %}
-                    {% for image in section_data.images %}
-                        {% if image is mapping and image.path %}
-                            <div>
-                                <img src="images/{{ image.path }}" alt="{{ image.caption | default(section_name) }}">
-                                {% if image.caption %}
-                                    <div class="image-caption">{{ image.caption }}</div>
+                {% if section_data.images %}
+                    <div class="image-container">
+                        {% if section_data.images is string %}
+                            <img src="images/{{ section_data.images }}" alt="{{ section_name }}">
+                        {% elif section_data.images is iterable %}
+                            {% for image in section_data.images %}
+                                {% if image is mapping and image.path %}
+                                    <div>
+                                        <img src="images/{{ image.path }}" alt="{{ image.caption | default(section_name) }}">
+                                        {% if image.caption %}
+                                            <div class="image-caption">{{ image.caption }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <img src="images/{{ image }}" alt="{{ section_name }}">
                                 {% endif %}
-                            </div>
-                        {% else %}
-                            <img src="images/{{ image }}" alt="{{ section_name }}">
+                            {% endfor %}
                         {% endif %}
-                    {% endfor %}
+                    </div>
                 {% endif %}
-                </div>
-            {% endif %}
-        </div>
+            </div>
+        {% endif %}
     {% endfor %}
 
+    {# Input parameters rendered at bottom (not as table) #}
+    {% if equipment_data.input_parameters %}
+        <div class="section" id="section-input_parameters">
+            <h3>Input Parameters</h3>
+            <div>
+            {% for key, item in equipment_data.input_parameters.items() %}
+                {% if item is mapping and 'value' in item %}
+                    <div class="input-group">
+                        <label for="{{ key }}">
+                            {{ key.replace('_', ' ').title() }}
+                            {% if item.unit %}<span style="color: #666;">({{ item.unit }})</span>{% endif %}
+                        </label>
+                        <input type="number" id="{{ key }}" data-param="{{ key }}" placeholder="Enter {{ key.replace('_', ' ') }}" step="any" data-unit="{{ item.unit }}">
+                        {% if item.description %}<small style="color: #999;">{{ item.description }}</small>{% endif %}
+                    </div>
+                {% else %}
+                    <div class="input-group">
+                        <label for="{{ key }}">{{ key.replace('_', ' ').title() }}</label>
+                        <input type="number" id="{{ key }}" data-param="{{ key }}" placeholder="Enter {{ key.replace('_', ' ') }}" step="any">
+                    </div>
+                {% endif %}
+            {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {# Additional checks rendered immediately after inputs #}
+    {% if additional_checks %}
+        <div class="section" id="section-additional_checks">
+            <h3>Additional Checks</h3>
+            <div id="checks-container">
+            {% for check_name, check_info in additional_checks.items() %}
+                <div class="check-result pending" id="check-{{ loop.index0 }}">
+                    <div class="check-icon">?</div>
+                    <div class="check-content">
+                        <div>
+                            {% if check_info.description %}{{ check_info.description }} {% else %} {{ check_name.replace('_', ' ').title() }} {% endif %}
+                        </div>
+                        <div class="check-value" id="check-value-{{ loop.index0 }}">Waiting for input...</div>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {# Manual link remains last #}
     {% if equipment_data.shaker.manual %}
         <div class="section">
             <h3>Documentation</h3>
             <a href="manuals/{{ equipment_data.shaker.manual }}" class="manual-link" target="_blank">📄 Download Manual</a>
         </div>
     {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    <script>
+    // Build checks array including unit + description
+    const checks = [
+        {% for check_name, check_info in additional_checks.items() %}
+        {
+            name: {{ check_name | tojson }},
+            left: {{ check_info.left | tojson }},
+            operator: {{ check_info.operator | tojson }},
+            right: {{ check_info.right | tojson }},
+            unit: {{ check_info.unit | tojson }},
+            description: {{ check_info.description | tojson }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    // allParameters collection and wiring (existing code)...
+    const allParameters = {};
+    document.querySelectorAll('table tbody tr[data-param]').forEach(row => {
+        const paramName = row.getAttribute('data-param');
+        const valueCell = row.querySelector('td:nth-child(2)');
+        if (!valueCell) return;
+        let value = valueCell.textContent.trim();
+        if (value.includes(' - ')) {
+            const parts = value.split(' - ').map(v => parseFloat(v));
+            allParameters[paramName] = parts;
+        } else {
+            const numValue = parseFloat(value);
+            allParameters[paramName] = isNaN(numValue) ? value : numValue;
+        }
+    });
+    document.querySelectorAll('input[data-param]').forEach(input => input.addEventListener('input', updateChecks));
+
+    function updateChecks() {
+        document.querySelectorAll('input[data-param]').forEach(input => {
+            const name = input.getAttribute('data-param');
+            const v = parseFloat(input.value);
+            allParameters[name] = isNaN(v) ? null : v;
+        });
+        checks.forEach((chk, idx) => evaluateCheck(idx, chk));
+    }
+
+    function evaluateCheck(index, check) {
+        const container = document.getElementById(`check-${index}`);
+        const valueDisplay = document.getElementById(`check-value-${index}`);
+        try {
+            let leftExpr = check.left;
+            for (const [p, v] of Object.entries(allParameters)) {
+                if (v !== null && v !== undefined) {
+                    leftExpr = leftExpr.replace(new RegExp(`\\b${p}\\b`, 'g'), `(${Array.isArray(v) ? v[0] : v})`);
+                }
+            }
+            const leftResult = Function(`'use strict'; return (${leftExpr})`)();
+
+            if (check.operator) {
+                let rightExpr = check.right;
+                for (const [p, v] of Object.entries(allParameters)) {
+                    if (v !== null && v !== undefined) {
+                        rightExpr = rightExpr.replace(new RegExp(`\\b${p}\\b`, 'g'), `(${Array.isArray(v) ? v[0] : v})`);
+                    }
+                }
+                const rightResult = Function(`'use strict'; return (${rightExpr})`)();
+
+                let passed;
+                switch (check.operator) {
+                    case '>': passed = leftResult > rightResult; break;
+                    case '<': passed = leftResult < rightResult; break;
+                    case '>=': passed = leftResult >= rightResult; break;
+                    case '<=': passed = leftResult <= rightResult; break;
+                    case '==': passed = leftResult == rightResult; break;
+                    case '!=': passed = leftResult != rightResult; break;
+                    default: passed = false;
+                }
+
+                container.className = `check-result ${passed ? 'pass' : 'fail'}`;
+                container.querySelector('.check-icon').textContent = passed ? '✓' : '✗';
+
+                const unitText = check.unit ? ` ${check.unit}` : '';
+                valueDisplay.textContent = `${leftResult.toFixed(4)} ${unitText} ${check.operator} ${rightResult.toFixed(4)} ${unitText} = ${passed ? 'PASS' : 'FAIL'}`;
+            } else {
+                container.className = 'check-result';
+                const unitText = check.unit ? ` ${check.unit}` : '';
+                valueDisplay.textContent = `Result: ${leftResult.toFixed(4)}${unitText}`;
+            }
+        } catch (err) {
+            const missing = [];
+            const nameRegex = /\b([a-zA-Z_]\w*)\b/g;
+            const expr = (check.left || '') + ' ' + (check.right || '');
+            let m;
+            const req = new Set();
+            while ((m = nameRegex.exec(expr)) !== null) req.add(m[1]);
+            for (const p of req) {
+                if (!(p in allParameters) || allParameters[p] === null) missing.push(p);
+            }
+            if (missing.length) {
+                container.className = 'check-result pending';
+                container.querySelector('.check-icon').textContent = '?';
+                valueDisplay.textContent = `Waiting for: ${missing.join(', ')}`;
+            } else {
+                container.className = 'check-result pending';
+                container.querySelector('.check-icon').textContent = '!';
+                valueDisplay.textContent = `Error: ${err.message}`;
+            }
+        }
+    }
+
+    // initial run
+    updateChecks();
+    </script>
 {% endblock %}

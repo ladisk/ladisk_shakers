@@ -1,3 +1,4 @@
+# ...existing code...
 import os
 import tomli
 import shutil
@@ -48,9 +49,14 @@ def parse_toml_comments(toml_path):
     
     return comments
 
-def enrich_toml_data(data, comments):
+def enrich_toml_data(data, comments, exclude_sections=None):
     """Add unit and description info from comments to TOML data"""
+    if exclude_sections is None:
+        exclude_sections = {'additional_checks'}
+    
     for section_name in data:
+        if section_name in exclude_sections:
+            continue
         if isinstance(data[section_name], dict):
             for key in list(data[section_name].keys()):
                 if key in comments:
@@ -63,6 +69,46 @@ def enrich_toml_data(data, comments):
                     }
     return data
 
+def parse_check_formula(formula_str):
+    """Parse additional check formula to extract expression and comparison
+    
+    Example: "axial_stiffness / 2 * (displacement_pk_pk - travel_required) / 9.81 > payload_mass"
+    Returns: {
+        'left': 'axial_stiffness / 2 * (displacement_pk_pk - travel_required) / 9.81',
+        'operator': '>',
+        'right': 'payload_mass',
+        'full': 'axial_stiffness / 2 * (displacement_pk_pk - travel_required) / 9.81 > payload_mass'
+    }
+    """
+    # Handle dict input (from enriched data)
+    if isinstance(formula_str, dict):
+        formula_str = formula_str.get('value', '')
+    
+    if not isinstance(formula_str, str):
+        formula_str = str(formula_str)
+    
+    # Find comparison operators (longer first)
+    operators = ['>=', '<=', '==', '!=', '>', '<']
+    
+    for op in operators:
+        if op in formula_str:
+            parts = formula_str.split(op, 1)
+            if len(parts) == 2:
+                return {
+                    'left': parts[0].strip(),
+                    'operator': op,
+                    'right': parts[1].strip(),
+                    'full': formula_str.strip()
+                }
+    
+    # If no comparison found, treat whole thing as expression
+    return {
+        'left': formula_str.strip(),
+        'operator': None,
+        'right': None,
+        'full': formula_str.strip()
+    }
+
 def process_toml_files(input_dir, output_dir, templates_dir):
     """Process all TOML files in input_dir and generate static HTML files in output_dir"""
     input_path = Path(input_dir)
@@ -70,7 +116,7 @@ def process_toml_files(input_dir, output_dir, templates_dir):
     templates_path = Path(templates_dir)
     
     # Setup Jinja2 environment
-    env = Environment(loader=FileSystemLoader(str(templates_path)))
+    env = Environment(loader=FileSystemLoader(str(templates_path)), trim_blocks=True, lstrip_blocks=True)
     equipment_template = env.get_template('equipment.html')
     index_template = env.get_template('index.html')
     
@@ -102,13 +148,38 @@ def process_toml_files(input_dir, output_dir, templates_dir):
         try:
             # Read and parse TOML file
             with open(toml_file, 'rb') as f:
-                data = tomli.load(f)
+                raw_data = tomli.load(f)
             
             # Parse comments to extract units and descriptions
             comments = parse_toml_comments(toml_file)
             
-            # Enrich data with unit and description info
-            data = enrich_toml_data(data, comments)
+            # Enrich data with unit and description info (exclude additional_checks so checks remain raw strings)
+            data = enrich_toml_data(dict(raw_data), comments, exclude_sections={'additional_checks'})
+            
+            # Parse additional checks to extract formulas (keep as structured dict)
+            additional_checks = {}
+            if 'additional_checks' in raw_data:
+                for check_name, formula in raw_data['additional_checks'].items():
+                    parsed = parse_check_formula(formula)
+                    # attach unit/description from parsed comments (if present)
+                    parsed['unit'] = comments.get(check_name, {}).get('unit', '')
+                    parsed['description'] = comments.get(check_name, {}).get('description', '')
+                    additional_checks[check_name] = parsed
+            
+            # Ensure input_parameters are present as mapping (wrap simple declarations)
+            if 'input_parameters' in raw_data and isinstance(raw_data['input_parameters'], dict):
+                # For any input param that wasn't enriched (e.g. declared as string "float"), wrap it with metadata
+                for key, val in raw_data['input_parameters'].items():
+                    if key not in data.get('input_parameters', {}):
+                        unit = comments.get(key, {}).get('unit', '')
+                        desc = comments.get(key, {}).get('description', '')
+                        if 'input_parameters' not in data:
+                            data['input_parameters'] = {}
+                        data['input_parameters'][key] = {
+                            'value': val,
+                            'unit': unit,
+                            'description': desc
+                        }
             
             # Extract equipment info
             shaker_info = data.get('shaker', {})
@@ -118,7 +189,7 @@ def process_toml_files(input_dir, output_dir, templates_dir):
 
             # Copy associated manuals if they exist
             manuals_input_path = input_path / 'manuals'
-            if manuals_input_path.exists():
+            if manuals_input_path.exists() and manuals_input_path.is_dir():
                 if 'manual' in shaker_info:
                     manual = shaker_info['manual']
                     src = manuals_input_path / manual
@@ -130,10 +201,13 @@ def process_toml_files(input_dir, output_dir, templates_dir):
             # Create HTML file name
             html_file = output_path / f"{toml_file.stem}.html"
             
-            # Render template with data
+            # We want additional_checks displayed immediately after input_parameters.
+            # Pass both equipment_data and additional_checks, and tell template which section to inject after.
             html_content = equipment_template.render(
                 title=title,
-                equipment_data=data
+                equipment_data=data,
+                additional_checks=additional_checks,
+                additional_checks_inject_after='input_parameters'
             )
             
             # Write HTML file
@@ -151,11 +225,13 @@ def process_toml_files(input_dir, output_dir, templates_dir):
                         if isinstance(images, str):
                             images = [images]
                         elif isinstance(images, dict):
-                            images = [images['path']]
+                            images = [images.get('path')]
                         elif isinstance(images, list):
-                            images = [img['path'] if isinstance(img, dict) else img for img in images]
+                            images = [img.get('path') if isinstance(img, dict) else img for img in images]
                         
                         for image in images:
+                            if not image:
+                                continue
                             src = images_input_path / image
                             if src.exists():
                                 dst = images_output_path / image
@@ -195,3 +271,4 @@ def process_toml_files(input_dir, output_dir, templates_dir):
 
 if __name__ == "__main__":
     process_toml_files("input", "docs", "templates")
+# ...existing code...
