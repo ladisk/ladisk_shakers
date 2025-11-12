@@ -185,6 +185,7 @@ def process_toml_files(input_dir, output_dir, templates_dir):
             shaker_info = data.get('shaker', {})
             manufacturer = shaker_info.get('manufacturer', 'Unknown')
             model = shaker_info.get('model', 'Unknown')
+            nominal_force = shaker_info.get('nominal_force', 'N/A')
             title = f"{manufacturer} {model}"
 
             # Copy associated manuals if they exist
@@ -235,7 +236,8 @@ def process_toml_files(input_dir, output_dir, templates_dir):
                 'filename': f"{toml_file.stem}.html",
                 'title': title,
                 'manufacturer': manufacturer,
-                'model': model
+                'model': model,
+                'nominal_force': f'{nominal_force["value"]} {nominal_force["unit"]}'
             })
             
         except Exception as e:
