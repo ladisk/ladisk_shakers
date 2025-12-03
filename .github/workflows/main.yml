@@ -28,6 +28,16 @@ jobs:
         run: |
           python generate_docs.py
 
+      - name: Copy .htaccess # password protection settings for InfinityFree hostting
+        run: cp docs-template/.htaccess docs/.htaccess
+
+      - name: Generate .htpasswd # generate encrypted password file from repo secrets for InfinityFree hosting
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apache2-utils
+          htpasswd -bc -B docs/.htpasswd "${{ secrets.BASIC_USERNAME }}" "${{ secrets.BASIC_PASSWORD }}"
+
+
       - name: Show built files
         run: |
           pwd
