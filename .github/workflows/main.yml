@@ -1,0 +1,46 @@
+name: Build and deploy to InfinityFree
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build docs
+        run: |
+          python generate_docs.py
+
+      - name: Show built files
+        run: |
+          pwd
+          ls -la
+          du -sh docs || true
+          find docs -maxdepth 3 -type f | sed -n '1,50p'
+
+      - name: Deploy to InfinityFree via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.INFINITYFREE_FTP_SERVER }}
+          username: ${{ secrets.INFINITYFREE_FTP_USERNAME }}
+          password: ${{ secrets.INFINITYFREE_FTP_PASSWORD }}
+          local-dir: docs
+          server-dir: htdocs/
+          log-level: verbose
