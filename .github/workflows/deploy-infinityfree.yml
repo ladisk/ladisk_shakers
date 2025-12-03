@@ -51,6 +51,6 @@ jobs:
           server: ${{ secrets.INFINITYFREE_FTP_SERVER }}
           username: ${{ secrets.INFINITYFREE_FTP_USERNAME }}
           password: ${{ secrets.INFINITYFREE_FTP_PASSWORD }}
-          local-dir: docs
+          local-dir: docs/
           server-dir: htdocs/
           log-level: verbose
