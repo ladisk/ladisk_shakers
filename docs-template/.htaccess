@@ -1,4 +1,4 @@
 AuthType Basic
 AuthName "Protected Area"
-AuthUserFile /home/vol14_8/infinityfree.com/if0_40586001/htdocs/.htpasswd
+AuthUserFile /home/vol14_8/infinityfree.com/if0_40586001/ladisk-oprema.is-great.net/htdocs/.htpasswd
 Require valid-user
