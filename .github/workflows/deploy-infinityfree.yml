@@ -52,5 +52,5 @@ jobs:
           username: ${{ secrets.INFINITYFREE_FTP_USERNAME }}
           password: ${{ secrets.INFINITYFREE_FTP_PASSWORD }}
           local-dir: docs/
-          server-dir: htdocs/
+          server-dir: ladisk-oprema.is-great.net/htdocs/
           log-level: verbose
